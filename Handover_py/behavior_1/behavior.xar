@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="指令盒行为结束时，送出信号。" id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="handover" id="2" localization="8" tooltip="include 4 seperate instruction box." x="415" y="181"><bitmap>media/images/box/box-diagram.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="pick up_onStart" type="1" type_size="1" nature="2" inner="0" tooltip="This input has been automatically generated&#x0A;by converting several boxes into a single box." id="2" /><Output name="retraction_onStopped" type="1" type_size="1" nature="2" inner="0" tooltip="This output has been automatically generated&#x0A;by converting several boxes into a single box." id="3" /><Parameter name="releaseSpeed" inherits_from_parent="0" content_type="3" value="fast" default_value="" custom_choice="0" tooltip="" id="4" /><Parameter name="retractionSpeed" inherits_from_parent="0" content_type="3" value="slow" default_value="" custom_choice="0" tooltip="" id="5" /><Parameter name="retractionAngle" inherits_from_parent="0" content_type="3" value="mode 2" default_value="" custom_choice="0" tooltip="" id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="pick up" id="1" localization="8" tooltip="This box describe how robot pick up something" x="415" y="181"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        import almath
+        session = self.session()
+
+        # 1.go to the start posture
+        self.logger.info("Start to stand still")
+        posture_service = session.service("ALRobotPosture")
+        posture_service.goToPosture("StandInit",0.2)
+        time.sleep(3.0)
+
+        # 2.pick up something
+        self.logger.info("Start to pick up something")
+        motion_service = session.service("ALMotion")
+        motion_service.setStiffnesses("Head", 1.0)
+        motion_service.setStiffnesses("RArm", 1.0)
+
+        names            = ["HeadYaw","HeadPitch","RElbowRoll","RShoulderPitch","RElbowYaw","RShoulderRoll"]
+        angles           = [-45.0*almath.TO_RAD,5.0*almath.TO_RAD,50.0*almath.TO_RAD,70.0*almath.TO_RAD,100.0*almath.TO_RAD,-60.0*almath.TO_RAD]
+        fractionMaxSpeed = [0.05]*6
+
+        motion_service.setAngles(names,angles,fractionMaxSpeed)
+
+        time.sleep(4.0)
+        motion_service.angleInterpolationWithSpeed("RHand",0,0.1)
+
+
+        self.onStopped() #activate the output of the box
+        pass
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="指令盒行为结束时，送出信号。" id="4" /></Box><Box name="approach user" id="3" localization="8" tooltip="This box descirbe how robot approach receiver after pick up something" x="668" y="200"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        import almath
+        session = self.session()
+        motion_service = session.service("ALMotion")
+
+        # 3.Approach Receiver
+        #time.sleep(2.0)
+        self.logger.info("3.approach receiver")
+        motion_service.setStiffnesses("Head", 1.0)
+        motion_service.setStiffnesses("RArm", 1.0)
+        names            = ["HeadYaw","HeadPitch","RElbowRoll","RShoulderPitch","RElbowYaw","RShoulderRoll"]
+        angles           = [0.0*almath.TO_RAD,0.0*almath.TO_RAD,50.0*almath.TO_RAD,40.0*almath.TO_RAD,100.0*almath.TO_RAD,-5.0*almath.TO_RAD]
+        fractionMaxSpeed = [0.1]*6
+        motion_service.setAngles(names,angles,fractionMaxSpeed)
+        time.sleep(3.0)
+
+        #motion_service.setStiffnesses("Head", 0.0)
+        #motion_service.setStiffnesses("RArm", 0.0)
+        self.onStopped() #activate the output of the box
+        pass
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="指令盒行为结束时，送出信号。" id="4" /></Box><Box name="retraction" id="5" localization="8" tooltip="Hadover Box with 3 parameters(release speed, retraction angle, retraction speed)" x="1167" y="218"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        import almath
+        session = self.session()
+        motion_service = session.service("ALMotion")
+        rs =1.0#default speed
+        retractionSpeed = self.getParameter("retractionSpeed")
+        self.logger.info("retraction speed : " + retractionSpeed)
+        if retractionSpeed == "slow":
+            rs = 0.05
+        elif retractionSpeed == "fast":
+            rs = 0.5
+        else:
+            self.logger.info("retratcion speed : wrong input")
+
+
+        # 4.Retract Hand Mid
+        retractionAngle = self.getParameter("retractionAngle")
+        motion_service.setStiffnesses("RArm", 1.0)
+        if retractionAngle == "mode 1":
+            self.logger.info("4.Retraction mode 1")
+
+            #motion_service.setAngles("RElbowRoll",0.5*almath.TO_RAD,rs)
+            #names            = ["RElbowRoll","RShoulderPitch","RElbowYaw","RShoulderRoll"]
+            #angles           = [5.0*almath.TO_RAD, 40.0*almath.TO_RAD, 100.0*almath.TO_RAD, -5.0*almath.TO_RAD]
+        #fractionMaxSpeed = [rs]*4
+        #motion_service.setAngles(names,angles,fractionMaxSpeed)
+            #names            = ["RElbowRoll","RShoulderPitch","RElbowYaw","RShoulderRoll"]
+            #angles           = [5.0*almath.TO_RAD,40.0*almath.TO_RAD,100.0*almath.TO_RAD,-20.0*almath.TO_RAD]
+            #fractionMaxSpeed = [rs]*4
+
+            #motion_service.setAngles(names,angles,fractionMaxSpeed)
+            motion_service.setAngles(["RShoulderPitch","RElbowRoll","RShoulderRoll"],[95.0*almath.TO_RAD,30.0*almath.TO_RAD,-20.0*almath.TO_RAD],[rs]*3)
+        elif retractionAngle == "mode 2":
+            self.logger.info("4.Retraction mode 2")
+            #motion_service.setAngles("RShoulderPitch",95.0*almath.TO_RAD,rs)
+            motion_service.setAngles(["RShoulderPitch","RElbowRoll"],[95.0*almath.TO_RAD,30.0*almath.TO_RAD],[rs]*2)
+        else:
+            self.logger.info("retraction angle : wrong input")
+             #default
+            self.logger.info("4.Retraction default mode 1")
+            motion_service.setAngles("RElbowRoll",5.0*almath.TO_RAD,rs)
+
+        time.sleep(2.0)
+        motion_service.setStiffnesses("RArm", 0.0)
+
+        # 5.Back to stand Pos
+        #self.logger.info("5.Back to stand still")
+        #posture_service = session.service("ALRobotPosture")
+        #posture_service.goToPosture("Stand",rs)
+        #time.sleep(3.0)
+
+        self.onStopped() #activate the output of the box
+        pass
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="指令盒行为结束时，送出信号。" id="4" /><Parameter name="retractionAngle" inherits_from_parent="0" content_type="3" value="mode 2" default_value="" custom_choice="0" tooltip="" id="5" /><Parameter name="retractionSpeed" inherits_from_parent="0" content_type="3" value="fast" default_value="" custom_choice="0" tooltip="" id="6" /></Box><Box name="loose hand" id="7" localization="8" tooltip='This box describe how a robot release an object, with release speed as parameter (&quot;slow&quot;, &quot;fast&quot;).' x="916" y="208"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        session = self.session()
+        motion_service = session.service("ALMotion")
+
+        motion_service.setStiffnesses("RArm", 1.0)
+        release_speed = self.getParameter("releaseSpeed")
+        self.logger.info("release speed:" + release_speed)
+        if release_speed == "slow":
+            motion_service.angleInterpolationWithSpeed("RHand",1,0.05)
+            time.sleep(2.0)
+        elif release_speed == "fast":
+            motion_service.angleInterpolationWithSpeed("RHand",1,0.5)
+            time.sleep(2.0)
+        else:
+            self.logger.info("release speed : wrong input")
+            motion_service.angleInterpolationWithSpeed("RHand",1,0.1)
+            time.sleep(2.0)
+
+        motion_service.setStiffnesses("RArm", 0.0)
+
+        self.onStopped() #activate the output of the box
+        pass
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="指令盒行为结束时，送出信号。" id="4" /><Parameter name="releaseSpeed" inherits_from_parent="0" content_type="3" value="slow" default_value="" custom_choice="0" tooltip="" id="5" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="3" indexofinput="2" outputowner="1" indexofoutput="4" /><Link inputowner="7" indexofinput="2" outputowner="3" indexofoutput="4" /><Link inputowner="5" indexofinput="2" outputowner="7" indexofoutput="4" /><Link inputowner="0" indexofinput="3" outputowner="5" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="3" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
